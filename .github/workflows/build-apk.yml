@@ -1,0 +1,40 @@
+
+name: Build KABO APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "KABO_starter_source-1.zip"
+      - ".github/workflows/build-apk.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get repository
+        uses: actions/checkout@v4
+
+      - name: Extract KABO project
+        run: |
+          mkdir app
+          unzip -o KABO_starter_source-1.zip -d app
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Build Android APK
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter build apk --release
+
+      - name: Save APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: KABO-APK
+          path: app/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
